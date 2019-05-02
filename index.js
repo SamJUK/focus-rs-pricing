@@ -101,6 +101,8 @@ create_puppeteer({headless: true})
     .then(end)
     .catch(err => {
         console.log(`Error: ${err}`);
+        global.browser.close();
+        process.exit();
     });
 
     
