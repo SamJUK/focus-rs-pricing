@@ -54,10 +54,11 @@ const print_overview = async obj => {
     let years = Object.keys(data);
     for (let i = 0; i < years.length; i++) {
         let prices = Object.values(data[years[i]]).map(e=>Number(e.price.substr(1).replace(',','')));
+        let total = prices.length;
         let avg = ((prices.reduce((previous, current) => current += previous)) / prices.length).toFixed(2);
         let low = Math.min(...prices).toFixed(2);
         let high = Math.max(...prices).toFixed(2);
-        console.log(`${years[i]} - Average: ${avg} - Lowest: ${low} - Highest: ${high}`);
+        console.log(`${years[i]} - Total: ${total} - Average: ${avg} - Lowest: ${low} - Highest: ${high}`);
     }
 };
 
