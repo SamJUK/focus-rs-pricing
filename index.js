@@ -6,7 +6,6 @@ const create_puppeteer = async config => {
 };
 
 const scrape_page = async page => {
-    await global.page.goto(page, {'waitUntil': 'networkidle0'});        
     return await global.page.evaluate(() => Array.from (document.querySelectorAll('.search-listing'))
         .map(e => Object({
             'title': e.querySelector('.listing-title').textContent.trim(),
@@ -20,16 +19,38 @@ const scrape_page = async page => {
 const scrape_pages = async data => {
     let dd = {};
     var years = ['2016','2017','2018'];
-    var baseUrl = 'https://www.autotrader.co.uk/car-search?sort=sponsored&radius=1500&postcode=cf54js&onesearchad=Used&onesearchad=Nearly%20New&onesearchad=New&make=FORD&model=FOCUS&aggregatedTrim=RS&exclude-writeoff-categories=on';
     for (let index = 0; index < years.length; index++) {
         var year = years[index];
-        var url = `${baseUrl}&year-from=${year}&year-to=${year}`;
-        dd[year] = await scrape_page(url);
+        dd[year] = (await scrape_term(year));
     }
 
     return dd;
 };
 
+const scrape_term = async year => {
+    let data = [];
+    var baseUrl = 'https://www.autotrader.co.uk/car-search?sort=sponsored&radius=1500&postcode=cf54js&onesearchad=Used&onesearchad=Nearly%20New&onesearchad=New&make=FORD&model=FOCUS&aggregatedTrim=RS&exclude-writeoff-categories=on';
+    let url = `${baseUrl}&year-from=${year}&year-to=${year}`;
+    let morePages = true;
+
+    await global.page.goto(url, {'waitUntil': 'networkidle0'});
+    while (morePages) {
+        let page_Data = await scrape_page();
+        data.push(...page_Data);
+
+        try {
+            await global.page.click('.pagination--right__active');
+            await global.page.waitForFunction (
+                () => (document.querySelector('.search-results__overlay') !== null && document.querySelector('.search-results__overlay').style.display !== 'block'),
+                {polling: 'mutation',timeout: 120000}
+                );
+        } catch (e) {
+            morePages = false;
+        }   
+    }
+
+    return data;
+};
 
 const save_data = async data => {
     let jsonFile = 'output.json';
