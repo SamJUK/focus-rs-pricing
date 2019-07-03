@@ -1,0 +1,71 @@
+<?php
+/**
+ * @var $this Car_Pricing
+ */
+?>
+<html>
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['line']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Day');
+            <?php foreach($this->years as $year):
+                $avg = money_format('%n', $this->averages[$year]); ?>
+                data.addColumn('number', '<?php echo "$year - $avg" ?>');
+            <?php endforeach; ?>
+
+            var rows = JSON.parse('<?php echo json_encode($this->rows); ?>');
+            data.addRows(rows);
+
+            var options = {
+                chart: {
+                    title: '<?php echo $this->getAppliedPriceType() ?> <?php echo $this->getVehicleName() ?> Price'
+                },
+                width: 900,
+                height: 500
+            };
+
+            var chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+            chart.draw(data, google.charts.Line.convertOptions(options));
+        }
+    </script>
+    <style>
+        button {
+            border: 0;
+            background: #dcdcdc;
+            color: black;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 0;
+            text-align: center;
+            margin: 0 15px 0 0;
+
+            box-sizing: border-box;
+        }
+        a {
+            padding: 10px 25px;
+            display: block;
+            width: 100%;
+            height: 100%;
+            color: black;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div style="margin-bottom: 35px;">
+    <p>Select Graph Price Value</p>
+    <?php foreach ($this->price_types as $type): ?>
+        <button><a href="?pricetype=<?php echo $type?>"><?php echo $type?></a></button>
+    <?php endforeach;?>
+</div>
+<hr/>
+<div id="linechart_material" style="width: 900px; height: 500px"></div>
+</body>
+</html>
