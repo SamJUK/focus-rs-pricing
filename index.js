@@ -33,7 +33,7 @@ const scrape_term = async year => {
     // var baseUrl = 'https://www.autotrader.co.uk/car-search?sort=sponsored&radius=1500&postcode=cf54js&onesearchad=Used&onesearchad=Nearly%20New&onesearchad=New&make=FORD&model=FOCUS&aggregatedTrim=RS&exclude-writeoff-categories=on';
     let baseUrl = 'https://www.autotrader.co.uk/car-search';
     let url_params_string = '';
-    let url_params = global.params;
+    let url_params = {...global.params};
     delete(url_params.years);
     for (let prm in url_params) {
         let fp = url_params[prm];
@@ -76,9 +76,9 @@ const save_data = async data => {
         jsonFile = process.env.hasOwnProperty('output');
     } else {
         let vehicle = [global.params.make,global.params.model,global.params.aggregatedTrim].join('_');
-        let fuel_type = process.env.hasOwnProperty('fuel_type') ? process.env.hasOwnProperty('fuel_type') : '';
-        let misc = [global.params.postcode,global.params.years].join('_');
-        jsonFile = `${vehicle}${fuel_type}${misc}.json`;
+        let fuel_type = process.env.hasOwnProperty('fuel_type') ? `${process.env['fuel_type']}_` : '';
+        let misc = [global.params.postcode,global.params.years.join('_')].join('_');
+        jsonFile = `${vehicle}_${fuel_type}_${misc}.json`;
     }
 
     let json = {};
@@ -92,7 +92,7 @@ const save_data = async data => {
 
     fs.writeFileSync(jsonFile, JSON.stringify(json));
     return {json:json,data:data,ds:ds};
-}
+};
 
 const print_overview = async obj => {
     let fuel_type = process.env.hasOwnProperty('fuel_type') ? process.env['fuel_type'] : '';
