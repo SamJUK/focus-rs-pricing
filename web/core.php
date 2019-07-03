@@ -9,7 +9,7 @@ class Car_Pricing
     protected $initial_reporting_level;
     protected $divider;
 
-    protected $vehicleName = '{vehicle_name}';
+    protected $vehicleName = '';
 
     public $years;
     public $rows;
@@ -119,7 +119,7 @@ class Car_Pricing
             $key = explode(' ', substr($key, 6))[0];
 
             // Drop vehicle type data
-            if($val[0].substr(0,7) === 'Vehicle') {
+            if(substr($val[0], 0, 7) === 'Vehicle') {
                 $this->vehicleName = array_shift($val);
             }
 
