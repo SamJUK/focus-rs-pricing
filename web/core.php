@@ -117,7 +117,9 @@ class Car_Pricing
             $key = explode(' ', substr($key, 6))[0];
 
             // Drop vehicle type data
-            $this->vehicleName = array_shift($val);
+            if($val[0].substr(0,7) === 'Vehicle') {
+                $this->vehicleName = array_shift($val);
+            }
 
             $final_data[$key] = [];
 
