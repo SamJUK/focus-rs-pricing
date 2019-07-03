@@ -78,7 +78,7 @@ const save_data = async data => {
         let vehicle = [global.params.make,global.params.model,global.params.aggregatedTrim].join('_');
         let fuel_type = process.env.hasOwnProperty('fuel_type') ? `${process.env['fuel_type']}_` : '';
         let misc = [global.params.postcode,global.params.years.join('_')].join('_');
-        jsonFile = `${vehicle}_${fuel_type}_${misc}.json`;
+        jsonFile = `${vehicle}_${fuel_type}${misc}.json`;
     }
 
     let json = {};
