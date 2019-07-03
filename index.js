@@ -18,7 +18,8 @@ const scrape_page = async page => {
 
 const scrape_pages = async data => {
     let dd = {};
-    var years = ['2016','2017','2018'];
+    var years = global.params.years;
+    // var years = ['2016','2017','2018'];
     for (let index = 0; index < years.length; index++) {
         var year = years[index];
         dd[year] = (await scrape_term(year));
@@ -29,8 +30,25 @@ const scrape_pages = async data => {
 
 const scrape_term = async year => {
     let data = [];
-    var baseUrl = 'https://www.autotrader.co.uk/car-search?sort=sponsored&radius=1500&postcode=cf54js&onesearchad=Used&onesearchad=Nearly%20New&onesearchad=New&make=FORD&model=FOCUS&aggregatedTrim=RS&exclude-writeoff-categories=on';
-    let url = `${baseUrl}&year-from=${year}&year-to=${year}`;
+    // var baseUrl = 'https://www.autotrader.co.uk/car-search?sort=sponsored&radius=1500&postcode=cf54js&onesearchad=Used&onesearchad=Nearly%20New&onesearchad=New&make=FORD&model=FOCUS&aggregatedTrim=RS&exclude-writeoff-categories=on';
+    let baseUrl = 'https://www.autotrader.co.uk/car-search';
+    let url_params_string = '';
+    let url_params = global.params;
+    delete(url_params.years);
+    for (let prm in url_params) {
+        let fp = url_params[prm];
+        if (fp instanceof Array) {
+            let mid = fp.join(`&${prm}=`);
+            url_params_string += `${prm}=${mid}&`;
+        } else {
+            url_params_string += `${prm}=${fp}&`;
+        }
+    }
+    if(url_params_string[url_params_string.length-1]==='&') {
+        url_params_string = url_params_string.substr(0, url_params_string.length-1);
+    }
+    let url = `${baseUrl}?${url_params_string}&year-from=${year}&year-to=${year}`;
+
     let morePages = true;
 
     await global.page.goto(url, {'waitUntil': 'networkidle0'});
@@ -54,6 +72,15 @@ const scrape_term = async year => {
 
 const save_data = async data => {
     let jsonFile = 'output.json';
+    if(process.env.hasOwnProperty('output')) {
+        jsonFile = process.env.hasOwnProperty('output');
+    } else {
+        let vehicle = [global.params.make,global.params.model,global.params.aggregatedTrim].join('_');
+        let fuel_type = process.env.hasOwnProperty('fuel_type') ? process.env.hasOwnProperty('fuel_type') : '';
+        let misc = [global.params.postcode,global.params.years].join('_');
+        jsonFile = `${vehicle}${fuel_type}${misc}.json`;
+    }
+
     let json = {};
     if (fs.existsSync(jsonFile)) {
         json = JSON.parse(fs.readFileSync(jsonFile));
@@ -68,9 +95,11 @@ const save_data = async data => {
 }
 
 const print_overview = async obj => {
+    let fuel_type = process.env.hasOwnProperty('fuel_type') ? process.env['fuel_type'] : '';
     console.log(`------------------`);
-    console.log(`Date: ${obj.ds}`);
-    
+    console.log(`Date: ${obj.ds} | Postcode: ${process.env.postcode}`);
+    console.log(`Vehicle: ${process.env.make} ${process.env.model} ${process.env.aggregatedTrim} ${fuel_type}`);
+
     let data = obj.data;
     let years = Object.keys(data);
     for (let i = 0; i < years.length; i++) {
@@ -92,6 +121,43 @@ const create_enviroment = async browser => {
     global.browser = browser;
     global.page = await global.browser.newPage();
 };
+
+// SETUP VARIABLES
+let params = {
+    'sort': 'sponsored',
+    'radius': 1500,
+    'onesearchad': ['Used','Nearly%20New','New'],
+    'postcode': null,
+    'make': null,
+    'model': null,
+    'aggregatedTrim': null,
+    'years':[],
+    'exclude-writeoff-categories': 'on',
+    'fuel-type': ['Diesel','Petrol']
+};
+
+for (let variable in process.env) {
+    let paramvariable = variable.replace(/_/gim, '-');
+    if (params.hasOwnProperty(paramvariable)) {
+        const fvar = process.env[variable].indexOf(',') !== -1
+            ? process.env[variable].split(',')
+            : process.env[variable];
+
+        params[paramvariable] = fvar;
+    }
+}
+
+// Make sure everything is set
+for (let param in params) {
+    const p = params[param];
+    if (p === null || p.length === 0) {
+        console.log('Bad Params');
+        process.exit(1);
+    }
+}
+
+global.params = params;
+
 
 create_puppeteer({headless: true})
     .then(create_enviroment)
