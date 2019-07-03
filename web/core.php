@@ -95,7 +95,9 @@ class Car_Pricing
         array_walk($data, function($val,$key) use (&$rows, $priceType) {
             $res = array($key);
             foreach (array_keys($val) as $k) {
-                $res[] = (float)$val[$k][$priceType];
+                if (isset($val[$k][$priceType])) {
+                    $res[] = (float)$val[$k][$priceType];
+                }
             }
             $rows[] = $res;
         });
