@@ -70,7 +70,9 @@ class Car_Pricing
     public function extractYearsFromData($data) : array
     {
         $cronDates = array_keys($data);
-        return array_keys($data[$cronDates[0]]);
+        $years = array_keys($data[$cronDates[0]]);
+        $years = array_values(array_filter($years, 'is_int'));
+        return $years;
     }
 
     public function processAverages(array $rows, array $years) : array
