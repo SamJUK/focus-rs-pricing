@@ -61,10 +61,15 @@
 </head>
 <body>
 <div style="margin-bottom: 35px;">
-    <p>Select Graph Price Value</p>
-    <?php foreach ($this->price_types as $type): ?>
-        <button><a href="?pricetype=<?php echo $type?>"><?php echo $type?></a></button>
-    <?php endforeach;?>
+    <div style="display:inline-block;border-right: 1px solid lightgrey;margin-right:10px;">
+        <button><a href="../">HOME</a></button>
+    </div>
+    <div style="display:inline-block;">
+        <p>Select Graph Price Value</p>
+        <?php foreach ($this->price_types as $type): ?>
+            <button><a href="?pricetype=<?php echo $type?>"><?php echo $type?></a></button>
+        <?php endforeach;?>
+    </div>
 </div>
 <hr/>
 <div id="linechart_material" style="width: 900px; height: 500px"></div>
