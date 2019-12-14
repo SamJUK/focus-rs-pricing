@@ -41,6 +41,7 @@ const scrape_term = async year => {
             let mid = fp.join(`&${prm}=`);
             url_params_string += `${prm}=${mid}&`;
         } else {
+            if (fp === '') { continue; }
             url_params_string += `${prm}=${fp}&`;
         }
     }
@@ -130,7 +131,9 @@ let params = {
     'postcode': null,
     'make': null,
     'model': null,
-    'aggregatedTrim': null,
+    'aggregatedTrim': '',
+    'minimum-mileage': '',
+    'maximum-mileage': '',
     'years':[],
     'exclude-writeoff-categories': 'on',
     'fuel-type': ['Diesel','Petrol']
@@ -150,7 +153,7 @@ for (let variable in process.env) {
 // Make sure everything is set
 for (let param in params) {
     const p = params[param];
-    if (p === null || p.length === 0) {
+    if (p === null) {
         console.log('Bad Params');
         process.exit(1);
     }
